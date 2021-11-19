@@ -8,7 +8,7 @@ In Windows host machine use the suggested script
   `get-all-certs.ps1`
 to extract all windows ca certificates in the specially created folder `all-certificates` just in current folder.
 
-And after link the created folder to `/etc/ssl/certs` and import its content. Go to WSL and do follow
+And after link the created folder to `/etc/ssl/certs` and import its content. Go to WSL and do the follow
 ```
   sudo mv /etc/ssl/certs /etc/ssl/certs.orig
   sudo ln -s /mnt/<path to the "all-certificates" folder> /etc/ssl/certs
