@@ -1,41 +1,36 @@
-#
-
-$StoreToDir = "all-certificates"
-$InsertLineBreaks=1
-
-If (Test-Path $StoreToDir) {
-    $path = "{0}\*" -f $StoreToDir
-    Remove-Item $StoreToDir -Recurse -Force
+function Set-CaCerts {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Low')]
+    param(
+        [Parameter()]
+        [string]
+        $CertOutPath = "$env:USERPROFILE\all-certificates\cacerts.pem",
+        [Parameter()]
+        [switch]
+        $FailFast
+    )
+    #Requires -Version 6.0
+    begin {
+        if ($FailFast) {
+            trap { Write-Error -Exception $_; return }  # Stop on error
+        }
+        # Collect the certs from the local machine
+        $certs = Get-ChildItem -Path Cert:\ -Recurse | Where-Object -FilterScript { $_ -is [System.Security.Cryptography.X509Certificates.X509Certificate2] -and $_.Thumbprint }
+        $certItem = New-Item -Path ($CertOutPath | Split-Path -Parent) -Name ($CertOutPath | Split-Path -Leaf) -ItemType File -Confirm:$ConfirmPreference -Force  # Create if not exists
+        if ($null -eq $certItem -and $WhatIfPreference) {
+            $certItem = [System.IO.FileInfo]::new($CertOutPath)  # For WhatIf, indicates hypothetical output file (not created)
+        }
+    }
+    process {
+        for ($i = 0; $i -lt $certs.Count; $i++) {
+            Write-Progress -Activity 'Aggregating certificates' -PercentComplete (100 * $i / $certs.Count)
+            @'
+-----BEGIN CERTIFICATE-----
+{0}
+-----END CERTIFICATE-----
+'@ -f ([System.Convert]::ToBase64String($certs[$i].RawData) -replace '(.{64})', "`$1`n") | Add-Content -Path $certItem -Confirm:$ConfirmPreference -WhatIf:$WhatIfPreference -Force
+        }
+    }
 }
-New-Item $StoreToDir -ItemType directory
-
-Get-ChildItem -Recurse cert: `
-  | Where-Object { $_ -is [System.Security.Cryptography.X509Certificates.X509Certificate2] } `
-  | ForEach-Object {
-    $name = $_.Subject -replace '[\W]', '_'
-    $oPem=new-object System.Text.StringBuilder
-    [void]$oPem.AppendLine("-----BEGIN CERTIFICATE-----")
-    [void]$oPem.AppendLine([System.Convert]::ToBase64String($_.RawData,$InsertLineBreaks))
-    [void]$oPem.AppendLine("-----END CERTIFICATE-----")
-
-    $path = "{0}\{1}.pem" -f $StoreToDir,$name
-
-    # the exported list of certificates contains certificates with similar subject
-    # let's put them in separate indexed files
-    $idx = 0
-    While (Test-Path $path) {
-      $idx++
-      $path = "{0}\{1}--{2}.pem" -f $StoreToDir,$name,$idx
-    }
-    If ($idx -gt 0) {
-      $path
-    }
-
-    # TODO unfortunately same certificates duplicates each other
-    # it's better to add a check for duplicates just here
-
-    $oPem.toString() | add-content $path
-    #Exit(0)
-  }
-
-# The End
+if ($MyInvocation.InvocationName -eq '.') {
+    Set-CaCerts
+}
