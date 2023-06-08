@@ -27,7 +27,7 @@ function Set-CaCerts {
 -----BEGIN CERTIFICATE-----
 {0}
 -----END CERTIFICATE-----
-'@ -f ([System.Convert]::ToBase64String($certs[$i].RawData) -replace '(.{64})', "`$1`n") | Add-Content -Path $certItem -Confirm:$ConfirmPreference -WhatIf:$WhatIfPreference -Force
+'@ -f ([System.Convert]::ToBase64String($certs[$i].RawData) -replace '(.{64})', "`$1`n") | Add-Content -Path $certItem -Force
         }
     }
 }
