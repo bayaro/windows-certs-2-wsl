@@ -8,7 +8,6 @@ function Set-CaCerts {
         [switch]
         $FailFast
     )
-    #Requires -Version 6.0
     begin {
         if ($FailFast) {
             trap { Write-Error -Exception $_; return }  # Stop on error
@@ -34,9 +33,6 @@ function Set-CaCerts {
 if ($MyInvocation.InvocationName -eq '.') {
     Set-CaCerts
 }
-=======
-#
-
 $StoreToDir = "all-certificates"
 $CertExtension = "pem" # use "crt" for usage on windows systems
 $InsertLineBreaks=1
