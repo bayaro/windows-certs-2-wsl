@@ -1,9 +1,9 @@
 
 
-There is a common issue to work in WSL under DPI shield. When we have not
+There is a common issue to work in WSL under DPI shield. When we don't have
 access to secured endpoints.
 
-The idea is to copy ca certificates from host Windows machine into WSL.
+The idea is to copy ca certificates from the host Windows machine into WSL.
 
 In Windows host machine use the suggested script `get-all-certs.ps1`
 to extract all windows ca certificates in the specially created folder
