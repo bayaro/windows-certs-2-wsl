@@ -9,7 +9,13 @@ In Windows host machine use the suggested script `get-all-certs.ps1`
 to extract all windows ca certificates in the specially created folder
 `all-certificates` just in the current folder.
 
-Inside WSL create a symlink from the created folder to `/etc/ssl/certs`
+You can run this command in Powershell (Run as administrator) by cloning
+this project and navigating to that directory to run the script with:
+```
+.\get-all-certs.ps1
+```
+
+Within WSL, create a symlink from the created folder to `/etc/ssl/certs`
 and import its content.
 ```
   sudo mv /etc/ssl/certs /etc/ssl/certs.orig
